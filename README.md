@@ -101,4 +101,4 @@ Ejecuta las pruebas de AES, RSA, sobre digital y de la API web (`pytest.ini` ya 
 - **Sin MAC ni firma digital**: el SHA-256 va dentro del mismo sobre, así que detecta alteraciones accidentales o parciales, pero un atacante que modifique el sobre completo podría recalcularlo. No autentica al remitente.
 - **Clave privada sin contraseña**: `private_key.pem` se guarda en PKCS#8 sin cifrar; quien obtenga el archivo puede abrir los sobres.
 - **Solo local**: el servidor escucha en `127.0.0.1`, sin autenticación ni HTTPS; no está pensado para desplegarse en una red pública.
-- Límite de 32 MB por petición; todo se procesa en memoria y no se guarda nada en el servidor.
+- Límite de 32 MB por petición. Como el sobre pesa ~4/3 del original (base64), conviene que los originales no superen ~20 MB para poder abrir el sobre dentro del límite; todo se procesa en memoria y no se guarda nada en el servidor.

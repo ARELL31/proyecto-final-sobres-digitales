@@ -12,7 +12,6 @@ from rsa_mod import ErrorRSA, descifrar_clave_sesion
 from sobre_digital.formato import ALGORITMOS, VERSION, nombre_base
 
 
-
 class ErrorSobre(Exception):
     """Error al crear, leer o abrir un sobre digital."""
 
@@ -24,7 +23,7 @@ def cargar_sobre(datos: bytes) -> dict:
     """Interpreta los bytes como un sobre digital (JSON UTF-8)."""
     try:
         sobre = json.loads(bytes(datos).decode("utf-8"))
-    except (UnicodeDecodeError, ValueError, TypeError) as e:
+    except (UnicodeDecodeError, ValueError, TypeError, RecursionError) as e:
         raise ErrorSobre("el archivo no es un sobre digital válido (JSON UTF-8)") from e
     if not isinstance(sobre, dict):
         raise ErrorSobre("el sobre digital debe ser un objeto JSON")
@@ -78,6 +77,6 @@ def abrir_sobre(sobre: dict, privada: rsa.RSAPrivateKey) -> tuple[str, bytes]:
         ) from e
 
     calculado = hashlib.sha256(datos).hexdigest()
-    if not hmac.compare_digest(calculado.encode(), hash_esperado.lower().encode()):
+    if not hmac.compare_digest(calculado.encode(), hash_esperado.encode()):
         raise ErrorSobre("sobre alterado: el SHA-256 no coincide")
     return nombre_base(nombre), datos

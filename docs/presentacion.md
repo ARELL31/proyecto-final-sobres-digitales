@@ -68,7 +68,7 @@ automática. Mientras carga la generación de claves (puede tardar con 3072), se
 Mostrar uno o dos (con sobres ya preparados), cada uno aparece en un recuadro rojo:
 
 - **Llave equivocada**: "no se pudo descifrar la clave de sesión: clave privada incorrecta o sobre alterado".
-- **Sobre alterado** (un carácter cambiado en `texto_cifrado` o `sha256_original`): error "sobre alterado ...".
+- **Sobre alterado** (un carácter de `texto_cifrado` o `sha256_original` reemplazado por uno *distinto*, p. ej. "3" por "7"; conviene tener el sobre alterado preparado de antemano): error "sobre alterado ...".
 - Pública en lugar de privada: "el archivo no es una clave privada PEM válida".
 - Archivo que no es un sobre: "el archivo no es un sobre digital válido (JSON UTF-8)".
 

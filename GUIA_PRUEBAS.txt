@@ -75,7 +75,9 @@ no debe descargarse ningún archivo.
 9. Sobre alterado. Crear un sobre (paso 5). Abrir el archivo .sobre.json descargado
    con un editor de texto y cambiar UN solo carácter dentro del valor de
    "texto_cifrado" (por ejemplo, una letra en medio de la cadena por otra letra o
-   número), o bien un carácter del valor de "sha256_original"; guardar. Abrir el
+   número), o bien un carácter del valor de "sha256_original"; guardar. El carácter
+   nuevo debe ser DISTINTO del original (por ejemplo, "3" por "7"). En una
+   presentación en vivo conviene preparar el sobre alterado de antemano. Abrir el
    sobre modificado con la clave privada correcta (paso 6).
    Resultado esperado: error que comienza con "sobre alterado" o contiene "sobre
    alterado", por ejemplo "sobre alterado: el SHA-256 no coincide" o "no se pudo

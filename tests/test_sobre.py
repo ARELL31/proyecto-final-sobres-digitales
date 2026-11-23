@@ -121,6 +121,28 @@ def test_alterado_mensaje_hash(par):
         abrir_sobre(sobre, privada)
 
 
+def test_alterado_mayuscula_en_hash(par):
+    privada, publica = par
+    sobre = crear_sobre(b"datos", "a.txt", publica)
+    h = sobre["sha256_original"]
+    i = next(k for k, c in enumerate(h) if c.isalpha())
+    sobre["sha256_original"] = h[:i] + h[i].upper() + h[i + 1:]
+    with pytest.raises(ErrorSobre, match="alterado"):
+        abrir_sobre(sobre, privada)
+
+
+def test_cargar_sobre_recursion_profunda():
+    with pytest.raises(ErrorSobre):
+        cargar_sobre(b"[" * 100000)
+
+
+@pytest.mark.parametrize("nombre", ["", "/", "C:\\", "..", "."])
+def test_nombre_vacio_o_especial(nombre, par):
+    privada, publica = par
+    sobre = crear_sobre(b"x", nombre, publica)
+    assert abrir_sobre(sobre, privada)[0] == "archivo_recuperado"
+
+
 def test_version_invalida(par):
     privada, publica = par
     sobre = crear_sobre(b"x", "a.txt", publica)

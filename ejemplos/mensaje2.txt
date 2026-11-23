@@ -1,0 +1,9 @@
+Mensaje de prueba número 2 (texto largo).
+El sobre digital cifra el archivo con una clave de sesión AES-256 y protege esa clave con la llave pública RSA del destinatario. Solo quien posea la llave privada puede recuperar el contenido.
+El sobre digital cifra el archivo con una clave de sesión AES-256 y protege esa clave con la llave pública RSA del destinatario. Solo quien posea la llave privada puede recuperar el contenido.
+El sobre digital cifra el archivo con una clave de sesión AES-256 y protege esa clave con la llave pública RSA del destinatario. Solo quien posea la llave privada puede recuperar el contenido.
+El sobre digital cifra el archivo con una clave de sesión AES-256 y protege esa clave con la llave pública RSA del destinatario. Solo quien posea la llave privada puede recuperar el contenido.
+El sobre digital cifra el archivo con una clave de sesión AES-256 y protege esa clave con la llave pública RSA del destinatario. Solo quien posea la llave privada puede recuperar el contenido.
+El sobre digital cifra el archivo con una clave de sesión AES-256 y protege esa clave con la llave pública RSA del destinatario. Solo quien posea la llave privada puede recuperar el contenido.
+El sobre digital cifra el archivo con una clave de sesión AES-256 y protege esa clave con la llave pública RSA del destinatario. Solo quien posea la llave privada puede recuperar el contenido.
+El sobre digital cifra el archivo con una clave de sesión AES-256 y protege esa clave con la llave pública RSA del destinatario. Solo quien posea la llave privada puede recuperar el contenido.

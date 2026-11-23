@@ -1,0 +1,3 @@
+Sobre digital: mensaje de prueba número 1.
+La criptografía híbrida combina AES y RSA para proteger la información.
+¡Mañana entregamos el proyecto final!

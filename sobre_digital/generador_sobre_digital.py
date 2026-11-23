@@ -15,7 +15,6 @@ ARCHIVOS_EJEMPLO = ("mensaje1.txt", "mensaje2.txt", "imagen.png", "documento.pdf
 DIR_EJEMPLOS = Path(__file__).resolve().parent.parent / "ejemplos"
 
 
-
 def _b64(datos: bytes) -> str:
     return base64.b64encode(datos).decode("ascii")
 

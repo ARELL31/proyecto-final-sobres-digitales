@@ -180,3 +180,14 @@ def test_peticion_grande(cliente, par):
 def test_main_no_tiene_cli():
     texto = (Path(__file__).resolve().parent.parent / "main.py").read_text(encoding="utf-8")
     assert "argparse" not in texto and "sys.argv" not in texto
+
+
+def test_index_tiene_secciones(cliente):
+    html = cliente.get("/").get_data(as_text=True)
+    for fragmento in [
+        'id="form-claves"', 'id="form-crear"', 'id="form-abrir"', 'id="form-demo"',
+        'name="archivo"', 'name="publica"', 'name="sobre"', 'name="privada"',
+        'value="2048"', 'value="3072"',
+    ]:
+        assert fragmento in html
+    assert "<script src=\"http" not in html

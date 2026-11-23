@@ -1,1 +1,294 @@
-<h1>Sobre digital</h1>
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sobre digital</title>
+<style>
+  :root {
+    --fondo: #f3f5f9; --tarjeta: #ffffff; --texto: #1c2430; --suave: #5b6676;
+    --borde: #d9dfe8; --acento: #2563eb; --acento-osc: #1d4ed8;
+    --ok: #15803d; --ok-fondo: #e8f6ed; --error: #b91c1c; --error-fondo: #fdecec;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--fondo); color: var(--texto);
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    font-size: 18px; line-height: 1.5;
+  }
+  header, main { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
+  header { padding-top: 28px; }
+  h1 { margin: 0 0 8px; font-size: 2.2rem; }
+  header p { margin: 0 0 24px; color: var(--suave); max-width: 900px; }
+  .rejilla { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; padding-bottom: 40px; }
+  @media (max-width: 800px) { .rejilla { grid-template-columns: 1fr; } }
+  .tarjeta {
+    background: var(--tarjeta); border: 1px solid var(--borde); border-radius: 14px;
+    padding: 20px; box-shadow: 0 1px 3px rgba(20, 30, 50, .06); min-width: 0;
+  }
+  .tarjeta h2 { margin: 0 0 6px; font-size: 1.3rem; display: flex; align-items: center; gap: 10px; }
+  .paso {
+    flex: none; width: 2rem; height: 2rem; border-radius: 50%; background: var(--acento);
+    color: #fff; display: inline-flex; align-items: center; justify-content: center; font-size: 1rem;
+  }
+  .desc { margin: 0 0 14px; color: var(--suave); font-size: .95rem; }
+  label { display: block; font-weight: 600; font-size: .95rem; margin: 10px 0 4px; }
+  input[type=file], select {
+    width: 100%; padding: 8px; border: 1px solid var(--borde); border-radius: 8px;
+    background: #fff; font: inherit; font-size: .95rem;
+  }
+  button, a.boton {
+    display: inline-block; margin-top: 14px; padding: 10px 18px; border: 0; border-radius: 8px;
+    background: var(--acento); color: #fff; font: inherit; font-weight: 600; cursor: pointer;
+    text-decoration: none;
+  }
+  button:hover, a.boton:hover { background: var(--acento-osc); }
+  button:disabled { background: #94a3b8; cursor: wait; }
+  a.boton { margin-right: 8px; background: #0f766e; }
+  a.boton:hover { background: #0d5f58; }
+  .resultado { margin-top: 14px; font-size: .95rem; }
+  .error {
+    background: var(--error-fondo); color: var(--error); border: 1px solid #f3b4b4;
+    border-radius: 8px; padding: 10px 12px; font-weight: 600;
+  }
+  .exito { color: var(--ok); font-weight: 600; margin: 0 0 8px; }
+  table { width: 100%; border-collapse: collapse; margin-top: 6px; }
+  th, td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--borde); vertical-align: top; }
+  th { color: var(--suave); font-weight: 600; white-space: nowrap; }
+  .hex, td.hex { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-size: .85rem; word-break: break-all; }
+  .si { color: var(--ok); font-weight: 700; }
+  .no { color: var(--error); font-weight: 700; }
+  .resumen { margin: 10px 0 0; padding: 10px 12px; border-radius: 8px; font-weight: 700; }
+  .resumen.ok { background: var(--ok-fondo); color: var(--ok); }
+  .resumen.mal { background: var(--error-fondo); color: var(--error); }
+  .tabla-ancha { overflow-x: auto; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Sobre digital</h1>
+  <p>Un sobre digital combina lo mejor de dos mundos: el archivo se cifra con <strong>AES-256-CBC</strong>
+  (rápido, con una clave de sesión aleatoria y un IV nuevo) y esa clave se protege con
+  <strong>RSA-OAEP-SHA256</strong> usando la clave pública del destinatario. Solo quien tiene la clave
+  privada puede abrirlo, y el SHA-256 confirma que el archivo no cambió.</p>
+</header>
+<main>
+<div class="rejilla">
+
+  <section class="tarjeta">
+    <h2><span class="paso">1</span> Generar claves</h2>
+    <p class="desc">Crea un par de claves RSA para el destinatario.</p>
+    <form id="form-claves">
+      <label for="bits-claves">Tamaño de clave</label>
+      <select id="bits-claves" name="bits">
+        <option value="2048">2048 bits</option>
+        <option value="3072">3072 bits</option>
+      </select>
+      <button type="submit">Generar claves</button>
+    </form>
+    <div class="resultado" id="res-claves"></div>
+  </section>
+
+  <section class="tarjeta">
+    <h2><span class="paso">2</span> Crear sobre</h2>
+    <p class="desc">Cifra un archivo con la clave pública del destinatario.</p>
+    <form id="form-crear">
+      <label for="crear-archivo">Archivo a proteger</label>
+      <input id="crear-archivo" type="file" name="archivo" required>
+      <label for="crear-publica">Clave pública (public_key.pem)</label>
+      <input id="crear-publica" type="file" name="publica" accept=".pem" required>
+      <button type="submit">Crear sobre</button>
+    </form>
+    <div class="resultado" id="res-crear"></div>
+  </section>
+
+  <section class="tarjeta">
+    <h2><span class="paso">3</span> Abrir sobre</h2>
+    <p class="desc">Recupera el archivo original con la clave privada.</p>
+    <form id="form-abrir">
+      <label for="abrir-sobre">Sobre (.sobre.json)</label>
+      <input id="abrir-sobre" type="file" name="sobre" accept=".json" required>
+      <label for="abrir-privada">Clave privada (private_key.pem)</label>
+      <input id="abrir-privada" type="file" name="privada" accept=".pem" required>
+      <button type="submit">Abrir sobre</button>
+    </form>
+    <div class="resultado" id="res-abrir"></div>
+  </section>
+
+  <section class="tarjeta">
+    <h2><span class="paso">4</span> Demo automática</h2>
+    <p class="desc">Genera claves, sella y abre los 4 archivos de ejemplo y compara sus huellas SHA-256.</p>
+    <form id="form-demo">
+      <button type="submit">Ejecutar demo</button>
+    </form>
+    <div class="resultado" id="res-demo"></div>
+  </section>
+
+</div>
+</main>
+
+<script>
+"use strict";
+
+function el(etiqueta, texto, clase) {
+  const e = document.createElement(etiqueta);
+  if (texto !== undefined) e.textContent = texto;
+  if (clase) e.className = clase;
+  return e;
+}
+
+function base64ABytes(b64) {
+  const bin = atob(b64);
+  const bytes = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+  return bytes;
+}
+
+// Descarga un Blob con el nombre dado (datos binarios ya como Uint8Array o texto).
+function descargarBlob(nombre, datos, tipo) {
+  const url = URL.createObjectURL(new Blob([datos], { type: tipo }));
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = nombre;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 10000);
+  return url;
+}
+
+function descargar(nombre, base64) {
+  return descargarBlob(nombre, base64ABytes(base64), "application/octet-stream");
+}
+
+function tamano(n) {
+  return n.toLocaleString("es") + " bytes";
+}
+
+function tabla(filas) {
+  const t = el("table");
+  for (const [k, v, hex] of filas) {
+    const tr = el("tr");
+    tr.append(el("th", k), el("td", v, hex ? "hex" : ""));
+    t.append(tr);
+  }
+  return t;
+}
+
+function mostrarError(cont, mensaje) {
+  cont.replaceChildren(el("div", mensaje, "error"));
+}
+
+// Envía el formulario a la API, gestiona estado del botón y errores.
+function conectar(idForm, idRes, ruta, alExito) {
+  const form = document.getElementById(idForm);
+  const res = document.getElementById(idRes);
+  const boton = form.querySelector("button");
+  form.addEventListener("submit", async (ev) => {
+    ev.preventDefault();
+    const textoOriginal = boton.textContent;
+    boton.disabled = true;
+    boton.textContent = "Procesando…";
+    res.replaceChildren();
+    try {
+      const resp = await fetch(ruta, { method: "POST", body: new FormData(form) });
+      let json = null;
+      try { json = await resp.json(); } catch (_) { /* respuesta no JSON */ }
+      if (!resp.ok || json === null) {
+        mostrarError(res, (json && json.error) || "No se pudo completar la operación. Inténtelo de nuevo.");
+      } else {
+        alExito(json, res);
+      }
+    } catch (_) {
+      mostrarError(res, "No se pudo conectar con el servidor. Verifique que esté en ejecución.");
+    } finally {
+      boton.disabled = false;
+      boton.textContent = textoOriginal;
+    }
+  });
+}
+
+function enlaceDescarga(nombre, texto, contenido, tipo) {
+  const a = el("a", texto, "boton");
+  a.href = URL.createObjectURL(new Blob([contenido], { type: tipo }));
+  a.download = nombre;
+  return a;
+}
+
+conectar("form-claves", "res-claves", "/api/claves", (j, res) => {
+  res.replaceChildren(
+    el("p", `Par RSA de ${j.bits} bits generado en ${j.tiempo_ms} ms.`, "exito"),
+    enlaceDescarga("private_key.pem", "Descargar private_key.pem", j.privada_pem, "application/x-pem-file"),
+    enlaceDescarga("public_key.pem", "Descargar public_key.pem", j.publica_pem, "application/x-pem-file"),
+    el("p", "Guarde la clave privada en secreto; comparta solo la pública.", "desc")
+  );
+});
+
+conectar("form-crear", "res-crear", "/api/crear", (j, res) => {
+  descargar(j.nombre, j.sobre_b64);
+  const d = j.detalles;
+  res.replaceChildren(
+    el("p", `Sobre creado y descargado: ${j.nombre}`, "exito"),
+    tabla([
+      ["Nombre", j.nombre.replace(/\.sobre\.json$/, "")],
+      ["Tamaño original", tamano(d.tamano_original)],
+      ["Tamaño cifrado", tamano(d.tamano_cifrado)],
+      ["IV (hex)", d.iv_hex, true],
+      ["Clave cifrada", tamano(d.clave_cifrada_bytes)],
+      ["SHA-256", d.sha256, true],
+      ["Bits RSA", String(d.bits_rsa)],
+    ])
+  );
+});
+
+conectar("form-abrir", "res-abrir", "/api/abrir", (j, res) => {
+  descargar(j.nombre, j.archivo_b64);
+  const d = j.detalles;
+  const verificado = el("span", "✔ verificado", "si");
+  res.replaceChildren(
+    el("p", `Sobre abierto; archivo recuperado: ${j.nombre}`, "exito"),
+    tabla([
+      ["Nombre", j.nombre],
+      ["Tamaño", tamano(d.tamano)],
+      ["SHA-256", d.sha256, true],
+      ["Bits RSA", String(d.bits_rsa)],
+    ])
+  );
+  const tr = el("tr");
+  tr.append(el("th", "Integridad"));
+  const td = el("td");
+  td.append(verificado, " (el SHA-256 coincide con el del sobre)");
+  tr.append(td);
+  res.querySelector("table").append(tr);
+});
+
+function abreviar(h) { return h.slice(0, 16) + "…"; }
+
+conectar("form-demo", "res-demo", "/api/demo", (j, res) => {
+  const t = el("table");
+  const cab = el("tr");
+  for (const c of ["Archivo", "Tamaño", "SHA-256 original", "SHA-256 recuperado", ""]) cab.append(el("th", c));
+  t.append(cab);
+  let aciertos = 0;
+  for (const r of j.resultados) {
+    if (r.ok) aciertos++;
+    const tr = el("tr");
+    tr.append(
+      el("td", r.archivo),
+      el("td", tamano(r.tamano)),
+      el("td", abreviar(r.sha256_original), "hex"),
+      el("td", abreviar(r.sha256_recuperado), "hex"),
+      el("td", r.ok ? "✔" : "✘", r.ok ? "si" : "no")
+    );
+    t.append(tr);
+  }
+  const total = j.resultados.length;
+  const resumen = el("p", `${aciertos}/${total} archivos recuperados idénticos`,
+    "resumen " + (aciertos === total ? "ok" : "mal"));
+  const caja = el("div", undefined, "tabla-ancha");
+  caja.append(t);
+  res.replaceChildren(caja, resumen);
+});
+</script>
+</body>
+</html>

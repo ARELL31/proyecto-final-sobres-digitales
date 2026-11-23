@@ -5,6 +5,7 @@
 \usepackage[margin=2.5cm]{geometry}
 \usepackage{booktabs}
 \usepackage{xcolor}
+\usepackage{graphicx}
 \usepackage{tikz}
 \usetikzlibrary{arrows.meta,positioning,shapes.geometric}
 \usepackage{listings}
@@ -263,6 +264,38 @@ La página única \cod{index.html} (CSS y JavaScript en línea, sin dependencias
 con \cod{fetch}, descarga los archivos devueltos y muestra los detalles o el error en la propia tarjeta. Los
 errores se devuelven como HTTP 400 con \cod{\{"error": "..."\}} en español (413 para peticiones demasiado
 grandes).
+
+\subsection{Ejemplo de uso}
+Las figuras \ref{fig:claves}--\ref{fig:pdf} muestran un recorrido completo con \cod{documento.pdf}: se genera
+un par RSA de 2048 bits, se crea el sobre con la clave pública y se abre con la privada. El SHA-256 del archivo
+recuperado (\cod{8419a781\ldots13197791}) coincide con el registrado en el sobre, por lo que la interfaz lo marca
+como \emph{verificado}. El tamaño cifrado (624 bytes) es mayor que el original (611 bytes) por el relleno PKCS\#7,
+que completa el último bloque de 16 bytes.
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.8\textwidth]{Generacion de claves.png}
+\caption{Página principal tras generar un par RSA de 2048 bits (124 ms) con la tarjeta \emph{Generar claves}.}
+\label{fig:claves}
+\end{figure}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.8\textwidth]{cifrado de documento pdf.png}
+\caption{Creación del sobre de \cod{documento.pdf} con \cod{public\_key.pem}: tamaños, IV, clave cifrada de
+256 bytes y SHA-256 del original.}
+\label{fig:crear}
+\end{figure}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.8\textwidth]{Documento y clave privada.png}
+\caption{Apertura de \cod{documento.pdf.sobre.json} con \cod{private\_key.pem}; la integridad queda verificada.}
+\label{fig:abrir}
+\end{figure}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.75\textwidth,trim=0 400 0 0,clip]{Documento decifrado.png}
+\caption{El PDF recuperado se abre normalmente en el visor.}
+\label{fig:pdf}
+\end{figure}
 
 \section{Pruebas y resultados}
 \subsection{Requisito $\to$ prueba}

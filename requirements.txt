@@ -1,0 +1,3 @@
+cryptography>=42
+Flask>=3.0
+pytest>=8

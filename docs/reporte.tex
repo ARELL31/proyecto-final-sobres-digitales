@@ -38,7 +38,7 @@ Se presenta el diseño, la implementación y la verificación de un sistema de \
 con una clave de sesión aleatoria, y esa clave se cifra con la clave pública RSA del destinatario mediante
 RSA-OAEP con SHA-256. El sistema se maneja únicamente desde una interfaz web local hecha con Flask. Todas las
 primitivas provienen de la biblioteca \cod{cryptography}; no se implementó ningún algoritmo a mano. Se
-describen los fundamentos, el formato del sobre, las pruebas automatizadas (79 pruebas, todas exitosas) y
+describen los fundamentos, el formato del sobre, las pruebas automatizadas (88 pruebas, todas exitosas) y
 las limitaciones del diseño.
 \end{abstract}
 \tableofcontents
@@ -286,7 +286,7 @@ RSA-OAEP (SHA-256, MGF1) & \cod{test\_oaep\_ida\_y\_vuelta}, \cod{test\_oaep\_es
   \cod{test\_llave\_equivocada}, \cod{test\_cifrado\_alterado} \\
 Formato y validación del sobre & \cod{test\_sobre::test\_campos\_del\_sobre}, \cod{test\_es\_json\_utf8},
   \cod{test\_nombre\_saneado}, \cod{test\_version\_invalida}, \cod{test\_sobre\_invalido}, \cod{test\_bits\_rsa\_invalido} \\
-Detección de alteración (SHA-256) & \cod{test\_alterado}, \cod{test\_alterado\_mensaje\_hash},
+Detección de alteración (SHA-256) & \cod{test\_alterado}, \cod{test\_alterado\_mensaje\_hash}, \cod{test\_alterado\_mayuscula\_en\_hash},
   \cod{test\_abrir\_sobre\_alterado} (GUI) \\
 Llave privada equivocada falla & \cod{test\_sobre::test\_llave\_equivocada}; \cod{test\_gui::test\_abrir\_llave\_equivocada} \\
 Interfaz web sin CLI & \cod{test\_gui::test\_main\_no\_tiene\_cli}, \cod{test\_index\_tiene\_secciones},
@@ -296,8 +296,8 @@ Interfaz web sin CLI & \cod{test\_gui::test\_main\_no\_tiene\_cli}, \cod{test\_i
 \end{table}
 
 \subsection{Resultados medidos}
-Ejecutando \cod{.venv/bin/pytest -q}: \textbf{79 pruebas, 79 exitosas} en 1.76\,s (AES 17, RSA 12, sobre 27,
-GUI 23). Se ejecutó además \cod{POST /api/demo} con el cliente de pruebas de Flask (RSA-2048). Los cuatro
+Ejecutando \cod{.venv/bin/pytest -q}: \textbf{88 pruebas, 88 exitosas} en 2.0\,s (AES 17, RSA 12, sobre 34,
+GUI 25). Se ejecutó además \cod{POST /api/demo} con el cliente de pruebas de Flask (RSA-2048). Los cuatro
 archivos se recuperaron con SHA-256 idéntico al original:
 \begin{table}[H]
 \centering\small
@@ -358,7 +358,7 @@ y \cod{tests/test\_gui.py} (tabla anterior); no se afirma que cada variante teng
 \section{Conclusiones}
 Se construyó un sobre digital funcional que cifra archivos binarios con AES-256-CBC, protege la clave de
 sesión con RSA-OAEP (SHA-256, MGF1-SHA256) y se opera por completo desde una interfaz web local. Cada requisito
-criptográfico se cumple en un módulo identificable y se verifica con una prueba automatizada (79 de 79 exitosas);
+criptográfico se cumple en un módulo identificable y se verifica con una prueba automatizada (88 de 88 exitosas);
 la demo recupera byte a byte los cuatro archivos de ejemplo. Usar exclusivamente \cod{cryptography} \cite{crypto} evita los
 errores típicos de implementaciones propias, y los pasos de validación hacen que los fallos sean claros y
 seguros. Las limitaciones más importantes (falta de autenticación del texto cifrado y de firma) están

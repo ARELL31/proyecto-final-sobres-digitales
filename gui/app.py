@@ -122,7 +122,7 @@ def crear_app() -> Flask:
             detalles={
                 "tamano": len(datos),
                 "sha256": hashlib.sha256(datos).hexdigest(),
-                "bits_rsa": sobre["bits_rsa"],
+                "bits_rsa": privada.key_size,
             },
         )
 

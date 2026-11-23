@@ -145,6 +145,21 @@ def test_abrir_sobre_alterado(cliente, par):
     assert "alterado" in resp.get_json()["error"]
 
 
+def test_abrir_recursion_profunda(cliente, par):
+    resp = _abrir(cliente, b"[" * 100000, par["privada_pem"])
+    assert resp.status_code == 400
+    assert "error" in resp.get_json()
+
+
+def test_abrir_bits_rsa_no_confiable(cliente, par):
+    j = _crear(cliente, b"hola", "a.txt", par["publica_pem"]).get_json()
+    sobre = json.loads(base64.b64decode(j["sobre_b64"]))
+    sobre["bits_rsa"] = 4096
+    resp = _abrir(cliente, json.dumps(sobre).encode(), par["privada_pem"])
+    assert resp.status_code == 200
+    assert resp.get_json()["detalles"]["bits_rsa"] == 2048
+
+
 def test_abrir_no_json(cliente, par):
     assert _abrir(cliente, b"\xff\xfe no es json", par["privada_pem"]).status_code == 400
 

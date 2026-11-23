@@ -1,0 +1,110 @@
+GUIA DE PRUEBAS - SOBRE DIGITAL (AES-256-CBC + RSA-OAEP)
+Autor: Luis Fernando Franco Arellano
+
+Todo se prueba desde el navegador. Los archivos descargados quedan en la carpeta
+de descargas del navegador (en esta guía, "Descargas").
+
+PREPARACION
+-----------
+1. Instalar y arrancar:
+     python3 -m venv .venv
+     source .venv/bin/activate        (Windows: .venv\Scripts\activate)
+     pip install -r requirements.txt
+     python main.py
+   Resultado esperado: la terminal muestra "Abre http://127.0.0.1:5000 en tu navegador".
+
+2. Abrir http://127.0.0.1:5000 en el navegador.
+   Resultado esperado: se ve la página "Sobre digital" con 4 tarjetas: 1 Generar claves,
+   2 Crear sobre, 3 Abrir sobre y 4 Demo automática.
+
+GENERAR CLAVES
+--------------
+3. En "Generar claves" elegir "2048 bits" y pulsar "Generar claves". Pulsar
+   "Descargar private_key.pem" y "Descargar public_key.pem".
+   Resultado esperado: mensaje "Par RSA de 2048 bits generado en ... ms." y dos
+   archivos descargados. private_key.pem empieza con "-----BEGIN PRIVATE KEY-----" y
+   public_key.pem con "-----BEGIN PUBLIC KEY-----".
+   Renombrar o mover estos dos archivos a una carpeta "claves2048".
+
+4. Elegir "3072 bits", pulsar "Generar claves" y descargar de nuevo ambos archivos.
+   Resultado esperado: mensaje "Par RSA de 3072 bits generado en ... ms." y un
+   segundo par, más largo. Moverlo a una carpeta "claves3072".
+
+CREAR Y ABRIR EL SOBRE DE CADA EJEMPLO
+--------------------------------------
+Repetir los pasos 5 a 7 para cada archivo de la carpeta ejemplos/: mensaje1.txt,
+mensaje2.txt, imagen.png y documento.pdf (usar el par de 2048 bits en uno y el de
+3072 bits en otro, por ejemplo 2048 para los textos y 3072 para PNG y PDF; el
+par con que se crea el sobre debe ser el mismo con que se abre).
+
+5. En "Crear sobre": en "Archivo a proteger" elegir el ejemplo; en "Clave pública
+   (public_key.pem)" elegir public_key.pem; pulsar "Crear sobre".
+   Resultado esperado: mensaje "Sobre creado y descargado: <nombre>.sobre.json", se
+   descarga ese archivo y aparece una tabla con Nombre, Tamaño original, Tamaño
+   cifrado (múltiplo de 16 y mayor que el original), IV (hex) de 32 caracteres hex,
+   Clave cifrada (256 bytes con 2048 bits; 384 bytes con 3072 bits), SHA-256 y Bits RSA.
+
+6. En "Abrir sobre": en "Sobre (.sobre.json)" elegir el sobre descargado; en
+   "Clave privada (private_key.pem)" elegir private_key.pem del mismo par; pulsar
+   "Abrir sobre".
+   Resultado esperado: mensaje "Sobre abierto; archivo recuperado: <nombre>", se
+   descarga el archivo y la tabla muestra Integridad "verificado (el SHA-256 coincide
+   con el del sobre)".
+
+7. Comparar huellas SHA-256 del original y del recuperado (en una terminal, dentro
+   de la carpeta correspondiente):
+     Linux:    sha256sum ejemplos/mensaje1.txt ~/Descargas/mensaje1.txt
+     Windows:  certutil -hashfile ejemplos\mensaje1.txt SHA256
+               certutil -hashfile %USERPROFILE%\Downloads\mensaje1.txt SHA256
+   Resultado esperado: ambas huellas son idénticas, e iguales al SHA-256 mostrado en
+   la página. Para imagen.png, el archivo recuperado se abre normalmente en un
+   visor; para documento.pdf, en un lector de PDF.
+   (Nota: si el navegador renombra el archivo, por ejemplo "mensaje1 (1).txt", usar
+   ese nombre en el comando.)
+
+CASOS DE ERROR
+--------------
+Cada error debe aparecer en un recuadro rojo dentro de la tarjeta correspondiente y
+no debe descargarse ningún archivo.
+
+8. Llave equivocada. Generar un segundo par (paso 3), crear un sobre con la pública
+   del primer par y abrirlo con la privada del segundo par.
+   Resultado esperado: error "no se pudo descifrar la clave de sesión: clave privada
+   incorrecta o sobre alterado".
+
+9. Sobre alterado. Crear un sobre (paso 5). Abrir el archivo .sobre.json descargado
+   con un editor de texto y cambiar UN solo carácter dentro del valor de
+   "texto_cifrado" (por ejemplo, una letra en medio de la cadena por otra letra o
+   número), o bien un carácter del valor de "sha256_original"; guardar. Abrir el
+   sobre modificado con la clave privada correcta (paso 6).
+   Resultado esperado: error que comienza con "sobre alterado" o contiene "sobre
+   alterado", por ejemplo "sobre alterado: el SHA-256 no coincide" o "no se pudo
+   descifrar el contenido: sobre alterado (...)". Si el carácter nuevo no es base64
+   válido, el error puede ser "el campo 'texto_cifrado' no es base64 válido".
+
+10. Pública en lugar de privada. En "Abrir sobre", elegir como clave privada el
+    archivo public_key.pem.
+    Resultado esperado: error "el archivo no es una clave privada PEM válida".
+    Prueba inversa: en "Crear sobre" elegir private_key.pem como clave pública;
+    resultado esperado: error "el archivo no es una clave pública PEM válida".
+
+11. Archivo que no es un sobre. En "Abrir sobre", elegir como sobre un archivo
+    cualquiera (por ejemplo mensaje1.txt o imagen.png) con la clave privada correcta.
+    Resultado esperado: error "el archivo no es un sobre digital válido (JSON
+    UTF-8)".
+
+DEMO AUTOMATICA
+---------------
+12. En "Demo automática" pulsar "Ejecutar demo".
+    Resultado esperado: una tabla con los 4 archivos (mensaje1.txt, mensaje2.txt,
+    imagen.png, documento.pdf), su tamaño, SHA-256 original y recuperado (primeros 16
+    caracteres), una marca verde en cada fila y el resumen verde "4/4 archivos
+    recuperados idénticos".
+
+PRUEBAS AUTOMATICAS
+-------------------
+13. Con el entorno virtual activo, en la raíz del proyecto, detener el servidor
+    (Ctrl+C) o usar otra terminal y ejecutar:
+      pytest
+    Resultado esperado: todas las pruebas pasan, sin fallos ni errores (resumen final
+    "... passed").

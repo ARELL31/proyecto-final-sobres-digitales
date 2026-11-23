@@ -9,6 +9,7 @@
 \usetikzlibrary{arrows.meta,positioning,shapes.geometric}
 \usepackage{listings}
 \usepackage{array}
+\usepackage{float}
 \usepackage[colorlinks=true,linkcolor=blue!50!black,urlcolor=blue!50!black]{hyperref}
 \renewcommand{\arraystretch}{1.15}
 \lstset{
@@ -17,6 +18,7 @@
   commentstyle=\color{gray},
   frame=single, framerule=0.3pt, breaklines=true,
   language=Python, columns=fullflexible, keepspaces=true,
+  showstringspaces=false,
   backgroundcolor=\color{black!3}
 }
 \lstdefinelanguage{json}{morestring=[b]",stringstyle=\color{green!40!black}}
@@ -138,7 +140,7 @@ clave RSA de 2048 bits para un mensaje de texto corto (los campos base64 se trun
   "texto_cifrado": "m5O5IX1nCBFqCWbeWNyRKO4q..."
 }
 \end{lstlisting}
-\begin{table}[h]
+\begin{table}[H]
 \centering
 \begin{tabular}{@{}lp{10cm}@{}}
 \toprule
@@ -156,32 +158,35 @@ Campo & Contenido \\ \midrule
 \end{table}
 
 \subsection{Flujo de creación y apertura}
-\begin{figure}[h]
+\begin{figure}[H]
 \centering
 \begin{tikzpicture}[
-  node distance=0.5cm and 0.9cm,
+  node distance=0.5cm and 0.8cm,
   caja/.style={draw,rounded corners,align=center,minimum height=0.9cm,font=\footnotesize,fill=blue!6},
   dato/.style={draw,align=center,minimum height=0.8cm,font=\footnotesize,fill=orange!12},
   >={Stealth}]
-\node[dato] (m) {Archivo $M$\\(bytes)};
-\node[caja,right=of m] (aes) {AES-256-CBC\\PKCS\#7};
+\node[caja] (aes) {AES-256-CBC\\PKCS\#7};
+\node[dato,left=of aes] (m) {Archivo $M$\\(bytes)};
+\node[dato,above=0.8cm of aes] (iv) {IV\\16 bytes};
+\node[dato,below=0.8cm of aes] (k) {Clave de sesión $K$\\32 bytes CSPRNG};
 \node[dato,right=of aes] (c) {$C$ (texto\\cifrado)};
-\node[caja,below=1.1cm of aes] (k) {Clave de sesión $K$\\32 bytes CSPRNG};
-\node[dato,left=of k] (iv) {IV\\16 bytes};
-\node[caja,below=1.0cm of k] (rsa) {RSA-OAEP\\SHA-256/MGF1};
+\node[caja,below=0.8cm of k] (rsa) {RSA-OAEP\\SHA-256/MGF1};
 \node[dato,left=of rsa] (pub) {\cod{public\_key.pem}};
 \node[dato,right=of rsa] (kc) {$K'$ (clave\\cifrada)};
-\node[caja,right=1.3cm of c] (js) {\cod{.sobre.json}\\$K'$, IV, $C$,\\SHA-256, metadatos};
+\node[caja,right=1.6cm of c] (js) {\cod{.sobre.json}\\$K'$, IV, $C$,\\SHA-256, metadatos};
+\node[dato,above=0.8cm of m] (h) {SHA-256\\de $M$};
 \draw[->] (m) -- (aes);
-\draw[->] (aes) -- (c);
+\draw[->] (iv) -- (aes);
 \draw[->] (k) -- (aes);
-\draw[->] (iv.north) |- (aes.west);
+\draw[->] (aes) -- (c);
 \draw[->] (k) -- (rsa);
 \draw[->] (pub) -- (rsa);
 \draw[->] (rsa) -- (kc);
 \draw[->] (c) -- (js);
-\draw[->] (kc) -| (js);
-\draw[->] (m.north) -- ++(0,0.5) -| ([xshift=-0.6cm]js.north) node[pos=0.25,above,font=\scriptsize]{SHA-256};
+\draw[->] (kc) -| ([xshift=-0.3cm]js.south);
+\draw[->] (m) -- (h);
+\draw[->] (iv.east) -| ([xshift=0.3cm]js.north);
+\draw[->] (h.north) -- ++(0,0.5) -| (js.north);
 \end{tikzpicture}
 \caption{Creación del sobre. Para abrirlo se invierte el flujo: \cod{private\_key.pem} descifra $K'$ para
 obtener $K$, AES descifra $C$ con $K$ y el IV, se quita el relleno y se compara el SHA-256.}
@@ -196,7 +201,7 @@ que mide 32 bytes; (3) descifrar con AES y quitar el relleno; (4) calcular el SH
 guardado; solo si coincide se entrega el archivo.
 
 \section{Implementación}
-Se usa exclusivamente \cod{cryptography}. Generación de la clave de sesión y del IV
+Se usa exclusivamente \cod{cryptography} \cite{crypto}. Generación de la clave de sesión y del IV
 (\cod{aes/generador\_claves\_aes.py}):
 \begin{lstlisting}
 def generar_clave_aes() -> bytes:
@@ -240,7 +245,7 @@ la interfaz lee y escribe en binario y no hay decodificación ni normalización 
 \cod{main.py} solo ejecuta \cod{crear\_app().run(host="127.0.0.1", port=5000)}; no usa \cod{argparse} ni
 subcomandos. La aplicación guarda todo en memoria, sin base de datos ni almacenamiento en el servidor, y limita
 la petición a 32 MB.
-\begin{table}[h]
+\begin{table}[H]
 \centering
 \begin{tabular}{@{}llp{7.2cm}@{}}
 \toprule
@@ -261,7 +266,7 @@ grandes).
 
 \section{Pruebas y resultados}
 \subsection{Requisito $\to$ prueba}
-\begin{table}[h]
+\begin{table}[H]
 \centering\small
 \begin{tabular}{@{}p{5.2cm}p{9.3cm}@{}}
 \toprule
@@ -294,7 +299,7 @@ Interfaz web sin CLI & \cod{test\_gui::test\_main\_no\_tiene\_cli}, \cod{test\_i
 Ejecutando \cod{.venv/bin/pytest -q}: \textbf{79 pruebas, 79 exitosas} en 1.76\,s (AES 17, RSA 12, sobre 27,
 GUI 23). Se ejecutó además \cod{POST /api/demo} con el cliente de pruebas de Flask (RSA-2048). Los cuatro
 archivos se recuperaron con SHA-256 idéntico al original:
-\begin{table}[h]
+\begin{table}[H]
 \centering\small
 \begin{tabular}{@{}lrrcc@{}}
 \toprule
@@ -309,7 +314,7 @@ Archivo & Tamaño (B) & Sobre (B) & SHA-256 (8 primeros hex) & Recuperado \\ \mi
 El sobre crece unos 4/3 respecto al texto cifrado por el base64 más una sobrecarga fija
 (clave cifrada de 256 bytes, IV, metadatos y hash). Tiempos de generación de un par RSA, medidos en esta
 máquina (cinco repeticiones directas de \cod{generar\_par\_rsa}):
-\begin{table}[h]
+\begin{table}[H]
 \centering
 \begin{tabular}{@{}lcc@{}}
 \toprule
@@ -326,15 +331,14 @@ inválido o no RSA; clave pública usada donde se espera la privada (y viceversa
 número de bits distinto de 2048/3072 al generar; JSON mal formado, campos faltantes o de tipo incorrecto,
 versión o algoritmos distintos de los soportados; base64 inválido; IV que no mide 16 bytes; llave privada
 equivocada (falla OAEP); clave de sesión de longitud distinta de 32 bytes; relleno PKCS\#7 inválido; SHA-256 que
-no coincide (``sobre alterado''); y peticiones mayores de 32 MB. Cada caso tiene al menos una prueba (tabla
-anterior y \cod{tests/test\_gui.py}).
+no coincide (``sobre alterado''); y peticiones mayores de 32 MB. Los casos principales están cubiertos por las pruebas de \cod{tests/test\_sobre.py}, \cod{tests/test\_rsa.py}
+y \cod{tests/test\_gui.py} (tabla anterior); no se afirma que cada variante tenga una prueba propia.
 
 \section{Limitaciones y mejoras}
 \begin{itemize}
   \item \textbf{AES-CBC sin autenticación.} CBC solo da confidencialidad; no hay MAC ni cifrado autenticado
     (como AES-GCM). Un atacante que pueda enviar sobres modificados y observar si se aceptan podría intentar
-    ataques de tipo \emph{padding oracle}. Aquí se mitiga parcialmente porque el servidor solo responde un
-    error genérico, pero no se elimina el riesgo. Mejora: usar AES-GCM o encrypt-then-MAC.
+    ataques de tipo \emph{padding oracle}. En este sistema el lector devuelve mensajes distintos para relleno PKCS\#7 inválido y para SHA-256 que no coincide, y esa diferencia podría actuar como oráculo de relleno; no se mitiga. Mitigación adecuada: cifrado autenticado (AES-GCM) o encrypt-then-MAC con HMAC-SHA256 verificado antes de descifrar, con un mensaje de error uniforme.
   \item \textbf{El SHA-256 dentro del sobre no es autenticación.} Está en el mismo JSON, sin protección: quien
     pueda modificar el sobre puede recalcularlo. Sirve para detectar alteraciones accidentales o parciales,
     no a un atacante activo. Tampoco hay firma digital, así que el destinatario no sabe quién creó el sobre.
@@ -355,7 +359,7 @@ anterior y \cod{tests/test\_gui.py}).
 Se construyó un sobre digital funcional que cifra archivos binarios con AES-256-CBC, protege la clave de
 sesión con RSA-OAEP (SHA-256, MGF1-SHA256) y se opera por completo desde una interfaz web local. Cada requisito
 criptográfico se cumple en un módulo identificable y se verifica con una prueba automatizada (79 de 79 exitosas);
-la demo recupera byte a byte los cuatro archivos de ejemplo. Usar exclusivamente \cod{cryptography} evita los
+la demo recupera byte a byte los cuatro archivos de ejemplo. Usar exclusivamente \cod{cryptography} \cite{crypto} evita los
 errores típicos de implementaciones propias, y los pasos de validación hacen que los fallos sean claros y
 seguros. Las limitaciones más importantes (falta de autenticación del texto cifrado y de firma) están
 documentadas y tienen una mejora concreta; pasar a un modo autenticado sería el siguiente paso natural.

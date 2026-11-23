@@ -13,4 +13,5 @@ ALGORITMOS = {
 
 def nombre_base(nombre: str) -> str:
     """Devuelve solo el nombre de archivo, sin rutas de Windows ni de POSIX."""
-    return PurePosixPath(PureWindowsPath(str(nombre)).name).name
+    base = PurePosixPath(PureWindowsPath(str(nombre)).name).name
+    return base if base not in ("", ".", "..") else "archivo_recuperado"

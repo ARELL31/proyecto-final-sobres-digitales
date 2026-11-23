@@ -197,7 +197,11 @@ function conectar(idForm, idRes, ruta, alExito) {
       if (!resp.ok || json === null) {
         mostrarError(res, (json && json.error) || "No se pudo completar la operación. Inténtelo de nuevo.");
       } else {
-        alExito(json, res);
+        try {
+          alExito(json, res);
+        } catch (e) {
+          mostrarError(res, `Error al procesar la respuesta: ${e.message}`);
+        }
       }
     } catch (_) {
       mostrarError(res, "No se pudo conectar con el servidor. Verifique que esté en ejecución.");

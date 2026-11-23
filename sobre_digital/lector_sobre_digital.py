@@ -9,12 +9,13 @@ from cryptography.hazmat.primitives.asymmetric import rsa
 
 from aes import TAM_IV, ErrorAES, descifrar_aes
 from rsa_mod import ErrorRSA, descifrar_clave_sesion
-from sobre_digital.generador_sobre_digital import (
-    ALGORITMOS,
-    VERSION,
-    ErrorSobre,
-    nombre_base,
-)
+from sobre_digital.formato import ALGORITMOS, VERSION, nombre_base
+
+
+
+class ErrorSobre(Exception):
+    """Error al crear, leer o abrir un sobre digital."""
+
 
 _CAMPOS_B64 = ("clave_cifrada", "iv", "texto_cifrado")
 
@@ -49,6 +50,9 @@ def abrir_sobre(sobre: dict, privada: rsa.RSAPrivateKey) -> tuple[str, bytes]:
         raise ErrorSobre(f"versión de sobre no soportada: {version!r}")
     if sobre.get("algoritmos") != ALGORITMOS:
         raise ErrorSobre("algoritmos del sobre no soportados")
+    bits = sobre.get("bits_rsa")
+    if isinstance(bits, bool) or not isinstance(bits, int):
+        raise ErrorSobre("falta el campo 'bits_rsa' en el sobre o no es un entero")
     nombre = sobre.get("nombre_original")
     hash_esperado = sobre.get("sha256_original")
     if not isinstance(nombre, str):

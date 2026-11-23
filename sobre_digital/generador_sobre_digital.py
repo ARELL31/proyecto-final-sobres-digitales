@@ -2,32 +2,18 @@
 import base64
 import hashlib
 import json
-from pathlib import Path, PurePosixPath, PureWindowsPath
+from pathlib import Path
 
 from cryptography.hazmat.primitives.asymmetric import rsa
 
 from aes import ErrorAES, cifrar_aes, generar_clave_aes
 from rsa_mod import ErrorRSA, cifrar_clave_sesion
+from sobre_digital.formato import ALGORITMOS, VERSION, nombre_base
+from sobre_digital.lector_sobre_digital import ErrorSobre
 
-VERSION = 1
 ARCHIVOS_EJEMPLO = ("mensaje1.txt", "mensaje2.txt", "imagen.png", "documento.pdf")
 DIR_EJEMPLOS = Path(__file__).resolve().parent.parent / "ejemplos"
-ALGORITMOS = {
-    "simetrico": "AES-256-CBC",
-    "padding": "PKCS7",
-    "asimetrico": "RSA-OAEP",
-    "hash": "SHA-256",
-    "mgf": "MGF1-SHA256",
-}
 
-
-class ErrorSobre(Exception):
-    """Error al crear, leer o abrir un sobre digital."""
-
-
-def nombre_base(nombre: str) -> str:
-    """Devuelve solo el nombre de archivo, sin rutas de Windows ni de POSIX."""
-    return PurePosixPath(PureWindowsPath(str(nombre)).name).name
 
 
 def _b64(datos: bytes) -> str:

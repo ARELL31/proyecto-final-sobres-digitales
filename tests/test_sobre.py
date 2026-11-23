@@ -162,3 +162,15 @@ def test_sobre_invalido(fabrica, par):
     privada, _ = par
     with pytest.raises(ErrorSobre):
         abrir_sobre(cargar_sobre(fabrica(par)), privada)
+
+
+@pytest.mark.parametrize("valor", [None, "2048", True])
+def test_bits_rsa_invalido(valor, par):
+    privada, publica = par
+    sobre = crear_sobre(b"x", "a.txt", publica)
+    if valor is None:
+        del sobre["bits_rsa"]
+    else:
+        sobre["bits_rsa"] = valor
+    with pytest.raises(ErrorSobre):
+        abrir_sobre(sobre, privada)
